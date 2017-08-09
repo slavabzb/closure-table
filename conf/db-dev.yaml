@@ -3,5 +3,5 @@ host: localhost
 maxsize: 1
 minsize: 1
 password: dvhba
-port: 3306
+port: 5432
 user: dvhb
