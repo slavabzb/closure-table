@@ -6,6 +6,7 @@ from aiohttp_swagger import setup_swagger
 import settings
 from db import init_pg, close_pg
 from middlewares import setup_middlewares
+from modules import documents
 from routes import setup_routes
 from utils import load_conf
 from .conf import load_app_conf
@@ -19,6 +20,7 @@ def init(loop):
     app.on_cleanup.append(close_pg)
 
     setup_routes(app)
+    documents.routes.setup_routes(app)
     setup_middlewares(app)
     setup_swagger(app)
 
