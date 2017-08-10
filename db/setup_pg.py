@@ -2,15 +2,8 @@ import aiopg.sa
 
 
 async def init_pg(app):
-    conf = app["config"]
-    engine = await aiopg.sa.create_engine(
-        database=conf["database"],
-        user=conf["user"],
-        password=conf["password"],
-        host=conf["host"],
-        port=conf["port"],
-        minsize=conf["minsize"],
-        maxsize=conf["maxsize"])
+    from settings import DATABASE
+    engine = await aiopg.sa.create_engine(**DATABASE)
     app["db"] = engine
 
 

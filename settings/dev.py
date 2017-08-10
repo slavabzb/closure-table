@@ -1,4 +1,18 @@
 from .base import *
 
-DB_CONF = os.path.join(BASE_DIR, "conf", "db-dev.yaml")
-APP_CONF = os.path.join(BASE_DIR, "conf", "app-dev.yaml")
+DEBUG = True
+
+DATABASE = {
+    "database": "dvhb",
+    "user": "dvhb",
+    "password": "dvhba",
+    "host": "localhost",
+    "port": 5432,
+    "maxsize": 1,
+    "minsize": 1,
+}
+
+SERVER = {
+    "host": "localhost",
+    "port": 8080,
+}
