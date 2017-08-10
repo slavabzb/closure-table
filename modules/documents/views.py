@@ -1,17 +1,35 @@
 from aiohttp import web
-from .queries import document_create
+from .queries import documents_create, documents_fetch
 
-__all__ = ["document_create_view"]
+__all__ = ["documents_create_view", "documents_fetch_view"]
 
 
-async def document_create_view(request):
+async def documents_fetch_view(request):
     """
-    Description end-point
     ---
     tags:
     - Documents
-    summary: Create document
-    description: This can only be done by the logged in user.
+    summary: Fetch documents.
+    description: Fetch documents.
+    produces:
+    - application/json
+    responses:
+    "200":
+      description: successful operation
+    """
+    async with request.app["db"].acquire() as cnx:
+        documents = await documents_fetch(cnx)
+        return web.json_response({"documents": documents})
+
+
+async def documents_create_view(request):
+    """
+    ---
+    tags:
+    - Documents
+    summary: Create new document.
+    description: Create new document. To create new root document send
+                 parent_id=0.
     produces:
     - application/json
     parameters:
@@ -29,16 +47,12 @@ async def document_create_view(request):
             format: int32
             type: integer
     responses:
-    "201":
+    "200":
       description: successful operation
     """
     async with request.app["db"].acquire() as cnx:
         params = await request.json()
         text = params["text"]
         parent_id = params["parent_id"]
-        # document_create(cnx, text, parent_id)
-        return web.json_response({
-            "status": "success",
-            "text": text,
-            "parent_id": parent_id
-        })
+        await documents_create(cnx, text, parent_id)
+        return web.Response()

@@ -17,6 +17,8 @@ def init(loop):
 
     app.on_startup.append(load_app_conf)
     app.on_startup.append(init_pg)
+    app.on_startup.append(documents.models.setup_models)
+
     app.on_cleanup.append(close_pg)
 
     setup_routes(app)
