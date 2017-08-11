@@ -1,4 +1,5 @@
-from aiohttp.web import HTTPException
+import logging
+from aiohttp.web import HTTPException, json_response
 
 from .handle_500 import handle_500
 from .handler_404 import handle_404
@@ -20,6 +21,10 @@ def error_handlers(overrides):
                     raise
                 else:
                     return await override(request, ex)
+            except Exception as ex:
+                logger = logging.getLogger(__name__)
+                logger.exception(ex)
+                return json_response({"error": "invalid request"}, status=400)
 
         return middleware_handler
 

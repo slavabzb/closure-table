@@ -1,33 +1,65 @@
 from aiohttp import web
-from .queries import documents_create, documents_fetch
 
-__all__ = ["documents_create_view", "documents_view", "document_view"]
+from .queries import documents_create, documents_search, documents_update, \
+    documents_children, documents_detail
+
+__all__ = [
+    "documents_create_view", "documents_search_view", "documents_detail_view",
+    "documents_update_view", "documents_children_view"
+]
 
 
-def make_response(data, message=None):
-    return web.json_response({"message": message, "documents": data})
+def make_response(values, message=None):
+    if message is None:
+        if values:
+            message = "{} record(s) found".format(len(values))
+        else:
+            message = "no records found"
+    return web.json_response({"message": message, "documents": values})
 
 
-async def documents_view(request):
+async def documents_children_view(request):
     """
     ---
     tags:
     - Documents
-    summary: Fetch documents.
-    description: Fetch documents.
+    summary: View subdocuments.
+    description: View all the subdocuments of given document.
     produces:
     - application/json
-    responses:
-    "200":
-      description: successful operation
+    parameters:
+    - in: path
+      name: id
+      description: Document ID
+      required: true
+      type: integer
     """
     async with request.app["db"].acquire() as cnx:
-        documents = await documents_fetch(cnx)
-        if documents:
-            message = "records found ({})".format(len(documents))
-        else:
-            message = "records not found"
-        return make_response(documents, message=message)
+        document_id = request.match_info["id"]
+        results = await documents_children(cnx, document_id)
+        return make_response(results)
+
+
+async def documents_search_view(request):
+    """
+    ---
+    tags:
+    - Documents
+    summary: Search documents.
+    description: Search documents by content.
+    produces:
+    - application/json
+    parameters:
+    - in: query
+      name: text
+      description: Search documents by text.
+      type: string
+      required: false
+    """
+    async with request.app["db"].acquire() as cnx:
+        params = request.query
+        documents = await documents_search(cnx, text=params.get("text", None))
+        return make_response(documents)
 
 
 async def documents_create_view(request):
@@ -54,27 +86,24 @@ async def documents_create_view(request):
           parent_id:
             format: int32
             type: integer
-    responses:
-    "200":
-      description: successful operation
     """
     async with request.app["db"].acquire() as cnx:
         params = await request.json()
         text = params["text"]
         parent_id = params["parent_id"]
         document_id = await documents_create(cnx, text, parent_id)
-        return make_response(message="records created", data={
+        return make_response(message="records created", values={
             "id": document_id
         })
 
 
-async def document_view(request):
+async def documents_detail_view(request):
     """
     ---
     tags:
     - Documents
-    summary: Fetch document.
-    description: Fetch document.
+    summary: View document details.
+    description: View document details.
     produces:
     - application/json
     parameters:
@@ -83,15 +112,46 @@ async def document_view(request):
       description: Document ID
       required: true
       type: integer
-    responses:
-    "200":
-      description: successful operation
     """
     async with request.app["db"].acquire() as cnx:
         document_id = request.match_info["id"]
-        documents = await documents_fetch(cnx, document_id)
-        if documents:
-            message = "records found ({})".format(len(documents))
-        else:
-            message = "records not found"
-        return make_response(documents, message=message)
+        documents = await documents_detail(cnx, document_id)
+        return make_response(documents)
+
+
+async def documents_update_view(request):
+    """
+    ---
+    tags:
+    - Documents
+    summary: Update document.
+    description: Update existing document.
+    produces:
+    - application/json
+    parameters:
+    - in: path
+      name: id
+      description: Document ID
+      required: true
+      type: integer
+    - in: body
+      name: body
+      description: The text of the document.
+      required: true
+      schema:
+        type: object
+        properties:
+          text:
+            type: string
+            required: true
+          parent_id:
+            format: int32
+            type: integer
+    """
+    async with request.app["db"].acquire() as cnx:
+        document_id = request.match_info["id"]
+        params = await request.json()
+        parent_id = params["parent_id"]
+        text = params["text"]
+        await documents_update(cnx, document_id, parent_id, text)
+        return make_response(message="records updated", values=[document_id])
