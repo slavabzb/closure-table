@@ -1,10 +1,14 @@
 from aiohttp import web
 from .queries import documents_create, documents_fetch
 
-__all__ = ["documents_create_view", "documents_fetch_view"]
+__all__ = ["documents_create_view", "documents_view", "document_view"]
 
 
-async def documents_fetch_view(request):
+def make_response(data, message=None):
+    return web.json_response({"message": message, "documents": data})
+
+
+async def documents_view(request):
     """
     ---
     tags:
@@ -19,7 +23,11 @@ async def documents_fetch_view(request):
     """
     async with request.app["db"].acquire() as cnx:
         documents = await documents_fetch(cnx)
-        return web.json_response({"documents": documents})
+        if documents:
+            message = "records found ({})".format(len(documents))
+        else:
+            message = "records not found"
+        return make_response(documents, message=message)
 
 
 async def documents_create_view(request):
@@ -54,5 +62,36 @@ async def documents_create_view(request):
         params = await request.json()
         text = params["text"]
         parent_id = params["parent_id"]
-        await documents_create(cnx, text, parent_id)
-        return web.Response()
+        document_id = await documents_create(cnx, text, parent_id)
+        return make_response(message="records created", data={
+            "id": document_id
+        })
+
+
+async def document_view(request):
+    """
+    ---
+    tags:
+    - Documents
+    summary: Fetch document.
+    description: Fetch document.
+    produces:
+    - application/json
+    parameters:
+    - in: path
+      name: id
+      description: Document ID
+      required: true
+      type: integer
+    responses:
+    "200":
+      description: successful operation
+    """
+    async with request.app["db"].acquire() as cnx:
+        document_id = request.match_info["id"]
+        documents = await documents_fetch(cnx, document_id)
+        if documents:
+            message = "records found ({})".format(len(documents))
+        else:
+            message = "records not found"
+        return make_response(documents, message=message)
