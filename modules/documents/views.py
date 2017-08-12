@@ -52,7 +52,7 @@ async def documents_search_view(request):
     parameters:
     - in: query
       name: text
-      description: Search documents by text.
+      description: Query text.
       type: string
       required: false
     """

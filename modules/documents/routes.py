@@ -13,7 +13,7 @@ def setup_routes(app):
 
     document = app.router.add_resource(BASE_URL + "/{id}")
     document.add_route("GET", documents_detail_view)
-    document.add_route("POST", documents_update_view)
+    document.add_route("PUT", documents_update_view)
 
     children = app.router.add_resource(BASE_URL + "/{id}/children")
     children.add_route("GET", documents_children_view)
