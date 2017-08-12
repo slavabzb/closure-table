@@ -3,6 +3,8 @@ from aiohttp import web
 from .queries import documents_create, documents_search, documents_update, \
     documents_children, documents_detail
 
+from ..auth import require
+
 __all__ = [
     "documents_create_view", "documents_search_view", "documents_detail_view",
     "documents_update_view", "documents_children_view"
@@ -18,6 +20,7 @@ def make_response(values, message=None):
     return web.json_response({"message": message, "documents": values})
 
 
+@require("protected")
 async def documents_children_view(request):
     """
     ---
@@ -40,6 +43,7 @@ async def documents_children_view(request):
         return make_response(results)
 
 
+@require("protected")
 async def documents_search_view(request):
     """
     ---
@@ -62,6 +66,7 @@ async def documents_search_view(request):
         return make_response(documents)
 
 
+@require("protected")
 async def documents_create_view(request):
     """
     ---
@@ -97,6 +102,7 @@ async def documents_create_view(request):
         })
 
 
+@require("protected")
 async def documents_detail_view(request):
     """
     ---
@@ -119,6 +125,7 @@ async def documents_detail_view(request):
         return make_response(documents)
 
 
+@require("protected")
 async def documents_update_view(request):
     """
     ---

@@ -1,4 +1,6 @@
 aiohttp==2.2.5
+aiohttp-security==0.1.0
+aiohttp-session==1.0.0
 aiohttp-swagger==1.0.5
 aiopg==0.13.0
 async-timeout==1.2.1
@@ -6,6 +8,7 @@ chardet==3.0.4
 Jinja2==2.9.6
 MarkupSafe==1.0
 multidict==3.1.3
+passlib==1.7.1
 psycopg2==2.7.3
 PyYAML==3.12
 SQLAlchemy==1.1.13
