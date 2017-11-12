@@ -27,10 +27,7 @@ def init(loop):
     return app
 
 
-def run(argv):
-    if "--debug" in argv:
-        os.environ.setdefault("DEBUG", "True")
-    from settings import SERVER
+def run(args):
     loop = asyncio.get_event_loop()
     app = init(loop)
-    web.run_app(app, **SERVER)
+    web.run_app(app)
