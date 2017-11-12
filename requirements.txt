@@ -5,11 +5,17 @@ aiohttp-swagger==1.0.5
 aiopg==0.13.0
 async-timeout==1.2.1
 chardet==3.0.4
+decorator==4.1.2
 Jinja2==2.9.6
 MarkupSafe==1.0
 multidict==3.1.3
 passlib==1.7.1
+pbr==3.1.1
 psycopg2==2.7.3
 PyYAML==3.12
+six==1.11.0
 SQLAlchemy==1.1.13
+sqlalchemy-migrate==0.11.0
+sqlparse==0.2.4
+Tempita==0.5.2
 yarl==0.12.0
