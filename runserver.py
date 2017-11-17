@@ -7,10 +7,14 @@ import db
 from middlewares import setup_middlewares
 from modules import documents, auth
 from apps import documents
+from apps.documents import app as foo_app
+
+from apps import documents
 
 
 def init(loop):
     app = web.Application(loop=loop)
+
 
     app.on_startup.append(db.setup_pg)
     # app.on_startup.append(auth.models.setup_models)
@@ -20,11 +24,11 @@ def init(loop):
     # auth.routes.setup_routes(app)
     # documents.routes.setup_routes(app)
 
-    documents.routes.setup_routes(app)
+    documents.init(app)
 
     setup_middlewares(app)
 
-    setup_swagger(app)
+    # setup_swagger(app)
 
     return app
 

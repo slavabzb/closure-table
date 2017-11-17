@@ -1,1 +1,1 @@
-from . import routes
+from .app import init
