@@ -2,18 +2,18 @@ import sqlalchemy as sa
 
 meta = sa.MetaData()
 
-documents = sa.Table(
-    'documents', meta,
+comments = sa.Table(
+    'comments', meta,
     sa.Column('id', sa.Integer, primary_key=True),
-    sa.Column('text', sa.UnicodeText)
+    sa.Column('content', sa.UnicodeText)
 )
 
 
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
-    documents.create()
+    comments.create()
 
 
 def downgrade(migrate_engine):
     meta.bind = migrate_engine
-    documents.drop()
+    comments.drop()

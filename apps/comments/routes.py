@@ -1,6 +1,6 @@
-from .views import create_view
+from apps.comments.views import create_view
 
-ENDPOINT = '/doc'
+ENDPOINT = '/comments'
 
 
 def setup_routes(app):

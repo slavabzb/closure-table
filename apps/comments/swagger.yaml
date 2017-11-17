@@ -2,10 +2,10 @@ swagger: "2.0"
 
 info:
   version: 1.0.0
-  title: Documents
-  description: Documents application API
+  title: Comments
+  description: Comments application API
 
-host: localhost:8080/documents
+host: localhost:8080/comments
 
 consumes:
   - application/json
@@ -13,22 +13,22 @@ produces:
   - application/json
 
 definitions:
-  documentId:
+  commentId:
     type: integer
-    description: the id of the document
+    description: the id of the comment
     example: 123456
 
-  document:
+  comment:
     type: object
     required:
       - text
     properties:
       parent_id:
         type: integer
-        description: the id of the parent document (null for root document)
+        description: the id of the parent comment (null for root comment)
       text:
         type: string
-        description: document text
+        description: comment text
 
   error:
     type: object
@@ -68,24 +68,24 @@ parameters:
     type: string
 
 paths:
-  /documents:
+  /comments:
     post:
-      summary: Creates a new document
-      operationId: createDocument
+      summary: Creates a new comment
+      operationId: createComment
       tags:
-        - documents
+        - comments
       parameters:
-        - name: document
+        - name: comment
           in: body
-          description: The document to create
+          description: The comment to create
           required: true
           schema:
-            $ref: "#/definitions/document"
+            $ref: "#/definitions/comment"
       responses:
         200:
-          description: Returns the id the newly-created document
+          description: Returns the id the newly-created comment
           schema:
-            $ref: "#/definitions/documentId"
+            $ref: "#/definitions/commentId"
         400:
           description: Invalid params
           schema:

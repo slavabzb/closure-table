@@ -1,18 +1,18 @@
 from aiohttp import web
 
-from .db.tables import documents
+from apps.comments.db import comments
 
 
 async def create_view(request):
     params = await request.json()
     parent_id = params.get('parent_id')
-    text = params.get('text')
-    if not text:
+    content = params.get('content')
+    if not content:
         return web.json_response(status=400, data={
-            'error': 'text cannot be empty'
+            'error': 'content cannot be empty'
         })
     async with request.app['db'].acquire() as conn:
-        document_id = await conn.scalar(documents.insert().values(text=text))
+        comment_id = await conn.scalar(comments.insert().values(content=content))
         return web.json_response({
-            'id': document_id
+            'id': comment_id
         })
