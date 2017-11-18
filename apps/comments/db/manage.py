@@ -2,4 +2,4 @@
 from migrate.versioning.shell import main
 
 if __name__ == '__main__':
-    main(debug='False', url='postgresql://dvhb:dvhba@localhost/dvhb', repository='apps/comments/db/')
+    main(repository='apps/comments/db/', debug='False', url='postgresql://dvhb:dvhba@localhost/dvhb')

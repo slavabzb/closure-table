@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from apps.comments.db import comments
+from apps.comments.db.tables import comments
 
 
 async def create_view(request):
