@@ -1,2 +1,1 @@
-from . import db
-from .app import setup_app
+from . import db, routes
