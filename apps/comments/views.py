@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from apps.comments.db.tables import comments
+from .db.queries import create_comment
 
 
 async def create_view(request):
@@ -12,7 +12,7 @@ async def create_view(request):
             'error': 'content cannot be empty'
         })
     async with request.app['db'].acquire() as conn:
-        comment_id = await conn.scalar(comments.insert().values(content=content))
+        comment_id = await create_comment(conn, content, parent_id)
         return web.json_response({
             'id': comment_id
         })

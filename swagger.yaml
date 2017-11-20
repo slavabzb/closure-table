@@ -5,7 +5,7 @@ info:
   title: Comments
   description: Comments application API
 
-host: localhost:8080/comments
+host: localhost:8080
 
 consumes:
   - application/json
@@ -21,14 +21,15 @@ definitions:
   comment:
     type: object
     required:
-      - text
+      - content
     properties:
       parent_id:
         type: integer
         description: the id of the parent comment (null for root comment)
-      text:
+      content:
         type: string
         description: comment text
+        example: I'm a comment!
 
   error:
     type: object
