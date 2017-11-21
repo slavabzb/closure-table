@@ -15,3 +15,15 @@ comments_tree = sa.Table(
     sa.Column('descendant_id', sa.Integer, sa.ForeignKey(comments.c.id), nullable=False),
     sa.Column('depth', sa.Integer, nullable=False)
 )
+
+
+def upgrade(migrate_engine):
+    meta.bind = migrate_engine
+    comments.create()
+    comments_tree.create()
+
+
+def downgrade(migrate_engine):
+    meta.bind = migrate_engine
+    comments_tree.drop()
+    comments.drop()
