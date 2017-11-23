@@ -1,8 +1,11 @@
-from apps.comments.views import create_view
+from apps.comments.views import get_tree_view, create_view
 
 ENDPOINT = '/comments'
 
 
 def setup_routes(app):
-    docs = app.router.add_resource(ENDPOINT)
-    docs.add_route('POST', create_view)
+    comment = app.router.add_resource(ENDPOINT + '/{id}')
+    comment.add_route('GET', get_tree_view)
+
+    comment_collection = app.router.add_resource(ENDPOINT)
+    comment_collection.add_route('POST', create_view)

@@ -61,6 +61,13 @@ definitions:
         maximum: 99999
 
 parameters:
+  commentId:
+    name: id
+    in: path
+    description: Id of the comment
+    required: true
+    type: integer
+
   petName:
     name: petName
     in: path
@@ -91,6 +98,16 @@ paths:
           description: Invalid params
           schema:
             $ref: "#/definitions/error"
+
+  /comments/{id}:
+    parameters:
+      - $ref: "#/parameters/commentId"
+
+    get:
+      summare: Returns a comment tree
+      operationId: getComment
+      tags:
+        - comments
 
   /pets/{petName}:
     parameters:

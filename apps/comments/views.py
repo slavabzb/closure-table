@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from .db.queries import create_comment
+from .db.queries import create, get_tree
 
 
 async def create_view(request):
@@ -12,7 +12,13 @@ async def create_view(request):
             'error': 'content cannot be empty'
         })
     async with request.app['db'].acquire() as conn:
-        comment_id = await create_comment(conn, content, parent_id)
+        comment_id = await create(conn, content, parent_id)
         return web.json_response({
             'id': comment_id
         })
+
+
+async def get_tree_view(request):
+    async with request.app['db'].acquire() as conn:
+        tree = await get_tree(conn, request.match_info['id'])
+        return web.json_response(tree)
