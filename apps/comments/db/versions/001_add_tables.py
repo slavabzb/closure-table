@@ -1,4 +1,3 @@
-from datetime import datetime
 import sqlalchemy as sa
 
 meta = sa.MetaData()
@@ -7,8 +6,8 @@ comments = sa.Table(
     'comments', meta,
     sa.Column('id', sa.Integer, primary_key=True),
     sa.Column('content', sa.String, nullable=False),
-    sa.Column('created', sa.DateTime, nullable=False, default=datetime.utcnow()),
-    sa.Column('updated', sa.DateTime, nullable=False, default=datetime.utcnow()),
+    sa.Column('created', sa.DateTime, nullable=False),
+    sa.Column('updated', sa.DateTime, nullable=False),
 )
 
 comments_tree = sa.Table(

@@ -3,7 +3,7 @@ swagger: "2.0"
 info:
   version: 1.0.0
   title: Comments
-  description: Comments application API
+  description: Comments API
 
 host: localhost:8080
 
@@ -23,23 +23,41 @@ definitions:
     required:
       - content
     properties:
+      id:
+        type: integer
+        description: the id of the comment
       parent_id:
         type: integer
         description: the id of the parent comment (null for root comment)
       content:
         type: string
         description: comment text
-        example: I'm a comment!
+        example: Comment content
+      created:
+        type: date-time
+        description: date and time when comment was created
+      updated:
+        type: date-time
+        description: date and time when comment was last updated
+      children:
+        type: array
+        items:
+          $ref: "#/definitions/comment"
 
-  error:
+  commentList:
     type: object
-    required:
-      - error
     properties:
-      error:
-        type: string
-        description: error description
-        example: an error occured
+      comments:
+        type: array
+        items:
+          $ref: "#/definitions/comment"
+
+  affected:
+    type: object
+    properties:
+      count:
+        type: integer
+        description: Number of comments that was affected by that operation
 
   address:
     type: object
@@ -77,6 +95,17 @@ parameters:
 
 paths:
   /comments:
+    get:
+      summary: Returns a list of root the comments
+      operationId: getRootComments
+      tags:
+        - comments
+      responses:
+        default:
+          description: A list of the root comments
+          schema:
+            $ref: "#/definitions/commentList"
+
     post:
       summary: Creates a new comment
       operationId: createComment
@@ -90,24 +119,60 @@ paths:
           schema:
             $ref: "#/definitions/comment"
       responses:
-        200:
+        default:
           description: Returns the id the newly-created comment
           schema:
             $ref: "#/definitions/commentId"
         400:
           description: Invalid params
-          schema:
-            $ref: "#/definitions/error"
 
   /comments/{id}:
     parameters:
       - $ref: "#/parameters/commentId"
 
     get:
-      summare: Returns a comment tree
+      summary: Returns the comment tree
       operationId: getComment
       tags:
         - comments
+      responses:
+        default:
+          description: The comment
+          schema:
+            $ref: "#/definitions/comment"
+        404:
+          description: Comment not found
+
+    patch:
+      summary: Updates a comment
+      operationId: updateComment
+      tags:
+        - comments
+      parameters:
+        - name: comment
+          in: body
+          description: The updated comment
+          required: true
+          schema:
+            $ref: "#/definitions/comment"
+      responses:
+        default:
+          description: Returns number of the updated comments
+          schema:
+            $ref: "#/definitions/affected"
+        400:
+          description: Invalid params
+
+    delete:
+      summary: Deletes the comment
+      operationId: deleteComment
+      tags:
+        - comments
+      responses:
+        default:
+          description: Returns number of the deleted comments
+          schema:
+            $ref: "#/definitions/affected"
 
   /pets/{petName}:
     parameters:

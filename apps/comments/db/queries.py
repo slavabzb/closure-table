@@ -1,33 +1,32 @@
+from datetime import datetime
+
 import sqlalchemy as sa
 
 from .tables import comments, comments_tree
 
 
-async def create(conn, content, parent_id=None):
+async def comment_create(conn, content, parent_id=None):
+    await conn.execute('BEGIN')
     try:
-        await conn.execute('BEGIN')
-
-        query = comments.insert().values(content=content)
+        query = comments.insert().values(
+            content=content, created=datetime.utcnow(),
+            updated=datetime.utcnow()
+        )
         comment_id = await conn.scalar(query)
-
         query = sa.select([comments_tree.c.depth + 1]).where(sa.and_(
             comments_tree.c.ancestor_id == parent_id,
             comments_tree.c.descendant_id == parent_id,
         ))
         depth = await conn.scalar(query)
-        depth = depth or 0
-
         query = comments_tree.insert().values(
             ancestor_id=comment_id, nearest_ancestor_id=comment_id,
-            descendant_id=comment_id, depth=depth
+            descendant_id=comment_id, depth=depth or 0
         )
         await conn.execute(query)
-
         if parent_id:
             ancestor = comments_tree.alias('ancestor')
             descendant = comments_tree.alias('descendant')
             nearest = comments_tree.alias('nearest')
-
             query = sa.select([
                 descendant.c.ancestor_id,
                 nearest.c.nearest_ancestor_id,
@@ -39,7 +38,6 @@ async def create(conn, content, parent_id=None):
                 nearest.c.ancestor_id == parent_id,
                 nearest.c.descendant_id == parent_id,
             ))
-
             query = comments_tree.insert().from_select([
                 comments_tree.c.ancestor_id,
                 comments_tree.c.nearest_ancestor_id,
@@ -55,7 +53,32 @@ async def create(conn, content, parent_id=None):
     return comment_id
 
 
-async def get_tree(conn, comment_id):
+async def comment_get(conn):
+    query = sa.select([
+        comments_tree.c.nearest_ancestor_id,
+        comments.c.id,
+        comments.c.content,
+        comments.c.created,
+        comments.c.updated,
+    ]).select_from(comments.join(
+        comments_tree, comments.c.id == comments_tree.c.descendant_id,
+    )).where(comments_tree.c.depth == 0)
+    comment_list = []
+    async for row in await conn.execute(query):
+        tree = {}
+        await make_tree(tree, {
+            'parent_id': row[0],
+            'id': row[1],
+            'content': row[2],
+            'created': row[3].strftime('%c'),
+            'updated': row[4].strftime('%c'),
+            'children': [],
+        })
+        comment_list.append(tree)
+    return comment_list
+
+
+async def comment_get_tree(conn, comment_id):
     query = sa.select([
         comments_tree.c.nearest_ancestor_id,
         comments.c.id,
@@ -65,10 +88,9 @@ async def get_tree(conn, comment_id):
     ]).select_from(comments.join(
         comments_tree, comments.c.id == comments_tree.c.descendant_id,
     )).where(comments_tree.c.ancestor_id == comment_id)
-    rows = await conn.execute(query)
     tree = {}
-    for row in rows:
-        make_tree(tree, {
+    async for row in await conn.execute(query):
+        await make_tree(tree, {
             'parent_id': row[0],
             'id': row[1],
             'content': row[2],
@@ -79,7 +101,7 @@ async def get_tree(conn, comment_id):
     return tree
 
 
-def make_tree(tree, data):
+async def make_tree(tree, data):
     if 'id' in tree:
         if tree['id'] == data['parent_id']:
             subtree = {}
@@ -87,9 +109,51 @@ def make_tree(tree, data):
             tree['children'].append(subtree)
         else:
             for child in tree['children']:
-                if child['id'] == data['parent_id']:
-                    make_tree(child, data)
-                    break
+                await make_tree(child, data)
     else:
         for k, v in data.items():
             tree[k] = v
+
+
+async def comment_update(conn, comment_id, content):
+    query = comments.update().where(comments.c.id == comment_id).values(
+        content=content, updated=datetime.utcnow()
+    )
+    result = await conn.execute(query)
+    return result.rowcount
+
+
+async def comment_delete(conn, comment_id):
+    await conn.execute('BEGIN')
+    try:
+        remove = comments_tree.alias('remove')
+        descendant = comments_tree.alias('descendant')
+        query = sa.select([remove.c.descendant_id, remove.c.id]).where(sa.and_(
+            sa.or_(
+                remove.c.ancestor_id == descendant.c.descendant_id,
+                remove.c.nearest_ancestor_id == descendant.c.descendant_id,
+                remove.c.descendant_id == descendant.c.descendant_id,
+            ),
+            descendant.c.ancestor_id == comment_id
+        ))
+        comment_ids = set()
+        comment_tree_ids = set()
+        async for row in conn.execute(query):
+            comment_ids.add(row[0])
+            comment_tree_ids.add(row[1])
+        if comment_tree_ids:
+            query = comments_tree.delete().where(comments_tree.c.id.in_(
+                comment_tree_ids
+            ))
+            await conn.execute(query)
+        if comment_ids:
+            query = comments.delete().where(comments.c.id.in_(
+                comment_ids
+            ))
+            await conn.execute(query)
+    except:
+        await conn.execute('ROLLBACK')
+        raise
+    else:
+        await conn.execute('COMMIT')
+    return len(comment_ids)
