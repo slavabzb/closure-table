@@ -96,7 +96,7 @@ parameters:
 paths:
   /comments:
     get:
-      summary: Returns a list of root the comments
+      summary: Returns a list of the root comments
       operationId: getRootComments
       tags:
         - comments
@@ -120,7 +120,7 @@ paths:
             $ref: "#/definitions/comment"
       responses:
         default:
-          description: Returns the id the newly-created comment
+          description: Returns an id of the newly-created comment
           schema:
             $ref: "#/definitions/commentId"
         400:

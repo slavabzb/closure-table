@@ -105,7 +105,7 @@ async def make_tree(tree, data):
     if 'id' in tree:
         if tree['id'] == data['parent_id']:
             subtree = {}
-            make_tree(subtree, data)
+            await make_tree(subtree, data)
             tree['children'].append(subtree)
         else:
             for child in tree['children']:
