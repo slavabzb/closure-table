@@ -3,7 +3,7 @@ import sqlalchemy as sa
 meta = sa.MetaData()
 
 comments = sa.Table(
-    'comments', meta,
+    'comments_comments', meta,
     sa.Column('id', sa.Integer, primary_key=True),
     sa.Column('content', sa.String, nullable=False),
     sa.Column('created', sa.DateTime, nullable=False),

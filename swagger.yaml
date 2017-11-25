@@ -89,6 +89,43 @@ parameters:
     type: string
 
 paths:
+  /auth/login:
+    post:
+      summary: Logs user in
+      operationId: authLogin
+      tags:
+        - auth
+      parameters:
+        - name: credentials
+          in: body
+          description: The user's credentials
+          required: true
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+                example: username@email.com
+              password:
+                type: string
+                example: "123"
+      responses:
+        default:
+          description: User has been logged in successfully.
+          schema:
+            type: object
+            required:
+              - token
+            properties:
+              token:
+                description: Auth token
+                type: string
+        401:
+          description: Email/password didn't match any registered users.
+
   /comments:
     get:
       summary: Returns a list of the root comments

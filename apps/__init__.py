@@ -1,1 +1,1 @@
-from . import comments
+from . import auth, comments

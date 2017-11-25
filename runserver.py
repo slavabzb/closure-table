@@ -5,7 +5,7 @@ import aiopg.sa
 from aiohttp import web
 from aiohttp_swagger import setup_swagger
 
-from apps import comments
+from apps import auth, comments
 from middlewares import setup_middlewares
 from settings import DATABASE
 
@@ -31,6 +31,7 @@ def init(loop):
     app.on_cleanup.append(close_pg)
 
     # auth.routes.setup_routes(app)
+    auth.routes.setup_routes(app)
     comments.routes.setup_routes(app)
 
     # setup_middlewares(app)
