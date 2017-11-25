@@ -1,7 +1,7 @@
 from aiohttp import web
 
 from .db.queries import comment_create, comment_update, comment_get_tree, \
-    comment_delete, comment_get
+    comment_delete, comment_get, comment_search
 
 
 async def comment_create_view(request):
@@ -43,3 +43,9 @@ async def comment_delete_view(request):
     async with request.app['db'].acquire() as conn:
         count = await comment_delete(conn, request.match_info['id'])
         return web.json_response({'deleted': count})
+
+
+async def comment_search_view(request):
+    async with request.app['db'].acquire() as conn:
+        comment_list = await comment_search(conn, request.match_info['text'])
+        return web.json_response({'comments': comment_list})

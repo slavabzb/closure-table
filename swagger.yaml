@@ -67,6 +67,13 @@ definitions:
         maximum: 99999
 
 parameters:
+  commentContent:
+    name: text
+    in: path
+    description: Content of the comment
+    required: true
+    type: string
+
   commentId:
     name: id
     in: path
@@ -174,6 +181,24 @@ paths:
                 type: integer
                 description: The number of the deleted comments
                 example: 2
+
+  /comments/search/{text}:
+    parameters:
+      - $ref: "#/parameters/commentContent"
+
+    get:
+      summary: A full-text comment search
+      operationId: commentSearch
+      tags:
+        - comments
+      responses:
+        default:
+          description: A list of the found comments
+          schema:
+            type: object
+            properties:
+              comments:
+                $ref: "#/definitions/commentList"
 
   /pets/{petName}:
     parameters:

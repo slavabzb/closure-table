@@ -7,7 +7,7 @@ meta = sa.MetaData()
 comments = sa.Table(
     'comments', meta,
     sa.Column('id', sa.Integer, primary_key=True),
-    sa.Column('content', sa.String(255), nullable=False),
+    sa.Column('content', sa.String, nullable=False),
     sa.Column('created', sa.DateTime, nullable=False, default=datetime.utcnow()),
     sa.Column('updated', sa.DateTime, nullable=False, default=datetime.utcnow()),
 )

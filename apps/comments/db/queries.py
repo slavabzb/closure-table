@@ -157,3 +157,16 @@ async def comment_delete(conn, comment_id):
     else:
         await conn.execute('COMMIT')
     return len(comment_ids)
+
+
+async def comment_search(conn, content):
+    query = comments.select(comments.c.content.match(content))
+    result = []
+    async for row in conn.execute(query):
+        result.append({
+            'id': row[0],
+            'content': row[1],
+            'created': row[2].strftime('%c'),
+            'updated': row[3].strftime('%c'),
+        })
+    return result
