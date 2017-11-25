@@ -40,24 +40,12 @@ definitions:
         type: date-time
         description: date and time when comment was last updated
       children:
-        type: array
-        items:
-          $ref: "#/definitions/comment"
+        $ref: "#/definitions/commentList"
 
   commentList:
-    type: object
-    properties:
-      comments:
-        type: array
-        items:
-          $ref: "#/definitions/comment"
-
-  affected:
-    type: object
-    properties:
-      count:
-        type: integer
-        description: Number of comments that was affected by that operation
+    type: array
+    items:
+      $ref: "#/definitions/comment"
 
   address:
     type: object
@@ -104,7 +92,10 @@ paths:
         default:
           description: A list of the root comments
           schema:
-            $ref: "#/definitions/commentList"
+            type: object
+            properties:
+              comments:
+                $ref: "#/definitions/commentList"
 
     post:
       summary: Creates a new comment
@@ -159,7 +150,12 @@ paths:
         default:
           description: Returns number of the updated comments
           schema:
-            $ref: "#/definitions/affected"
+            type: object
+            properties:
+              updated:
+                type: integer
+                description: The number of the updated comments
+                example: 1
         400:
           description: Invalid params
 
@@ -170,9 +166,14 @@ paths:
         - comments
       responses:
         default:
-          description: Returns number of the deleted comments
+          description: Returns the number of the deleted comments
           schema:
-            $ref: "#/definitions/affected"
+            type: object
+            properties:
+              deleted:
+                type: integer
+                description: The number of the deleted comments
+                example: 2
 
   /pets/{petName}:
     parameters:
