@@ -20,8 +20,23 @@ definitions:
 
   comment:
     type: object
-    required:
-      - content
+    properties:
+      id:
+        type: integer
+        description: the id of the comment
+      content:
+        type: string
+        description: comment text
+        example: Comment content
+      created:
+        type: date-time
+        description: date and time when comment was created
+      updated:
+        type: date-time
+        description: date and time when comment was last updated
+
+  commentTree:
+    type: object
     properties:
       id:
         type: integer
@@ -40,33 +55,28 @@ definitions:
         type: date-time
         description: date and time when comment was last updated
       children:
-        $ref: "#/definitions/commentList"
+        type: array
+        items:
+          $ref: "#/definitions/commentTree"
 
-  commentList:
-    type: array
-    items:
-      $ref: "#/definitions/comment"
-
-  address:
+  error:
     type: object
+    required:
+      - error
     properties:
-      street:
+      error:
         type: string
-        minLength: 1
-      city:
-        type: string
-        minLength: 1
-      state:
-        type: string
-        minLength: 2
-        maxLength: 2
-        pattern: "^[A-Z]+$"
-      zipcode:
-        type: integer
-        minimum: 10000
-        maximum: 99999
+        description: An error message
+        example: An error occured
 
 parameters:
+  authToken:
+    name: X-Auth-Token
+    in: header
+    description: An authorization token
+    required: false
+    type: string
+
   commentContent:
     name: text
     in: path
@@ -80,13 +90,6 @@ parameters:
     description: Id of the comment
     required: true
     type: integer
-
-  petName:
-    name: petName
-    in: path
-    description: Name of the pet
-    required: true
-    type: string
 
 paths:
   /auth/login:
@@ -114,19 +117,28 @@ paths:
                 example: "123"
       responses:
         default:
-          description: User has been logged in successfully.
+          description: Returns the auth token
           schema:
             type: object
             required:
               - token
+              - expired
             properties:
               token:
-                description: Auth token
+                description: The valid auth token
                 type: string
-        401:
-          description: Email/password didn't match any registered users.
+              expired:
+                description: Auth token expiration date
+                type: date-time
+        400:
+          description: Invalid credentials
+          schema:
+            $ref: "#/definitions/error"
 
   /comments:
+    parameters:
+      - $ref: "#/parameters/authToken"
+
     get:
       summary: Returns a list of the root comments
       operationId: getRootComments
@@ -134,12 +146,14 @@ paths:
         - comments
       responses:
         default:
-          description: A list of the root comments
+          description: A list of the root comments without parent-child relations info
           schema:
             type: object
             properties:
               comments:
-                $ref: "#/definitions/commentList"
+                type: array
+                items:
+                  $ref: "#/definitions/comment"
 
     post:
       summary: Creates a new comment
@@ -152,7 +166,17 @@ paths:
           description: The comment to create
           required: true
           schema:
-            $ref: "#/definitions/comment"
+            type: object
+            required:
+              - content
+            properties:
+              parent_id:
+                type: integer
+                description: the id of the parent comment (null for the root comment)
+              content:
+                type: string
+                description: comment text
+                example: New comment
       responses:
         default:
           description: Returns an id of the newly-created comment
@@ -164,6 +188,7 @@ paths:
   /comments/{id}:
     parameters:
       - $ref: "#/parameters/commentId"
+      - $ref: "#/parameters/authToken"
 
     get:
       summary: Returns the comment tree
@@ -174,22 +199,29 @@ paths:
         default:
           description: The comment
           schema:
-            $ref: "#/definitions/comment"
+            $ref: "#/definitions/commentTree"
         404:
           description: Comment not found
 
     patch:
-      summary: Updates a comment
+      summary: Updates an existing comment
       operationId: updateComment
       tags:
         - comments
       parameters:
-        - name: comment
+        - name: content
           in: body
           description: The updated comment
           required: true
           schema:
-            $ref: "#/definitions/comment"
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                type: string
+                description: comment text
+                example: Updated comment
       responses:
         default:
           description: Returns number of the updated comments
@@ -222,6 +254,7 @@ paths:
   /comments/search/{text}:
     parameters:
       - $ref: "#/parameters/commentContent"
+      - $ref: "#/parameters/authToken"
 
     get:
       summary: A full-text comment search
@@ -230,170 +263,11 @@ paths:
         - comments
       responses:
         default:
-          description: A list of the found comments
+          description: A list of the matching comments
           schema:
             type: object
             properties:
               comments:
-                $ref: "#/definitions/commentList"
-
-  /pets/{petName}:
-    parameters:
-      - $ref: "#/parameters/petName"
-
-    get:
-      description: Returns a pet by name
-      operationId: findPetByName
-      responses:
-        default:
-          description: Returns the pet data
-          schema:
-            $ref: "#/definitions/pet"
-          headers:
-            last-modified:
-              type: string
-              description: The date/time that the pet was last modified
-
-    delete:
-      description: Deletes a single pet based on the name supplied
-      operationId: deletePet
-      responses:
-        default:
-          description: Returns the pet that was deleted
-          schema:
-            $ref: "#/definitions/pet"
-
-    patch:
-      description: Updates a pet by name
-      parameters:
-        - name: pet
-          in: body
-          description: The updated pet info
-          required: true
-          schema:
-            $ref: "#/definitions/pet"
-      responses:
-        default:
-          description: Returns the updated pet data
-          schema:
-            $ref: "#/definitions/pet"
-
-  /pets/{petName}/photos:
-    parameters:
-      - $ref: "#/parameters/petName"
-
-    post:
-      description: Upload a new pet photo
-      operationId: addPetPhoto
-      consumes:
-        - multipart/form-data
-      parameters:
-        - name: id
-          in: formData
-          description: The photo ID (generated automatically)
-          type: integer
-          format: int32
-          minimum: 1
-        - name: label
-          in: formData
-          description: A label for the photo
-          required: true
-          type: string
-          minLength: 1
-        - name: description
-          in: formData
-          description: An optional description of the photo
-          type: string
-        - name: photo
-          in: formData
-          description: The pet photo
-          required: true
-          type: file
-          minLength: 1
-          maxLength: 5000000  # ~5MB
-      responses:
-        default:
-          description: Returns the photo information
-          schema:
-            type: object
-            properties:
-              id:
-                type: integer
-                format: int32
-                description: The auto-generated photo ID
-              label:
-                type: string
-              description:
-                type: string
-              photo:
-                type: object
-                description: Information about the photo (size, file name, etc.)
-          headers:
-            Location:
-              type: string
-              description: The URL of the newly-added photo
-
-    get:
-      description: Get a list of the photos for a pet
-      responses:
-        200:
-          description: Returns the list of photos
-          schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  format: int32
-                  description: The auto-generated photo ID
-                label:
-                  type: string
-                description:
-                  type: string
-                photo:
-                  type: object
-                  description: Information about the photo (size, file name, etc.)
-
-  /pets/{petName}/photos/{id}:
-    parameters:
-      - $ref: "#/parameters/petName"
-      - name: id
-        in: path
-        description: The ID of the photo
-        required: true
-        type: integer
-        format: int32
-
-    get:
-      description: Gets a pet photo
-      operationId: getPetPhoto
-      produces:
-        - image/jpeg
-        - image/gif
-        - image/png
-        - image/bmp
-      responses:
-        default:
-          description: Returns the pet photo
-          schema:
-            type: file
-
-    delete:
-      description: Deletes a pet photo
-      operationId: deletePetPhoto
-      responses:
-        default:
-          description: The photo was deleted successfully
-
-  /:
-    get:
-      produces:
-        - text/html
-      responses:
-        default:
-          description: The Swagger Pet Store homepage :)
-          schema:
-            type: file
-            default:
-              $ref: index.html
+                type: array
+                items:
+                  $ref: "#/definitions/comment"

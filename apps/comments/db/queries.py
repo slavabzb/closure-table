@@ -55,7 +55,6 @@ async def comment_create(conn, content, parent_id=None):
 
 async def comment_get(conn):
     query = sa.select([
-        comments_tree.c.nearest_ancestor_id,
         comments.c.id,
         comments.c.content,
         comments.c.created,
@@ -67,12 +66,10 @@ async def comment_get(conn):
     async for row in await conn.execute(query):
         tree = {}
         await make_tree(tree, {
-            'parent_id': row[0],
-            'id': row[1],
-            'content': row[2],
-            'created': row[3].strftime('%c'),
-            'updated': row[4].strftime('%c'),
-            'children': [],
+            'id': row[0],
+            'content': row[1],
+            'created': row[2].strftime('%c'),
+            'updated': row[3].strftime('%c'),
         })
         comment_list.append(tree)
     return comment_list
