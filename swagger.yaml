@@ -28,12 +28,6 @@ definitions:
         type: string
         description: comment text
         example: Comment content
-      created:
-        type: date-time
-        description: date and time when comment was created
-      updated:
-        type: date-time
-        description: date and time when comment was last updated
 
   commentTree:
     type: object
@@ -48,12 +42,6 @@ definitions:
         type: string
         description: comment text
         example: Comment content
-      created:
-        type: date-time
-        description: date and time when comment was created
-      updated:
-        type: date-time
-        description: date and time when comment was last updated
       children:
         type: array
         items:

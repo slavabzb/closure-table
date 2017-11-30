@@ -1,6 +1,5 @@
-from datetime import datetime
-
 import sqlalchemy as sa
+from sqlalchemy.sql.expression import func
 
 from .tables import comments, comments_tree
 
@@ -8,10 +7,7 @@ from .tables import comments, comments_tree
 async def comment_create(conn, content, parent_id=None):
     await conn.execute('BEGIN')
     try:
-        query = comments.insert().values(
-            content=content, created=datetime.utcnow(),
-            updated=datetime.utcnow()
-        )
+        query = comments.insert().values(content=content)
         comment_id = await conn.scalar(query)
         query = sa.select([comments_tree.c.depth + 1]).where(sa.and_(
             comments_tree.c.ancestor_id == parent_id,
@@ -57,8 +53,6 @@ async def comment_get(conn):
     query = sa.select([
         comments.c.id,
         comments.c.content,
-        comments.c.created,
-        comments.c.updated,
     ]).select_from(comments.join(
         comments_tree, comments.c.id == comments_tree.c.descendant_id,
     )).where(comments_tree.c.depth == 0)
@@ -68,8 +62,6 @@ async def comment_get(conn):
         await make_tree(tree, {
             'id': row[0],
             'content': row[1],
-            'created': row[2].strftime('%c'),
-            'updated': row[3].strftime('%c'),
         })
         comment_list.append(tree)
     return comment_list
@@ -80,8 +72,6 @@ async def comment_get_tree(conn, comment_id):
         comments_tree.c.nearest_ancestor_id,
         comments.c.id,
         comments.c.content,
-        comments.c.created,
-        comments.c.updated,
     ]).select_from(comments.join(
         comments_tree, comments.c.id == comments_tree.c.descendant_id,
     )).where(comments_tree.c.ancestor_id == comment_id)
@@ -91,8 +81,6 @@ async def comment_get_tree(conn, comment_id):
             'parent_id': row[0],
             'id': row[1],
             'content': row[2],
-            'created': row[3].strftime('%c'),
-            'updated': row[4].strftime('%c'),
             'children': [],
         })
     return tree
@@ -114,7 +102,7 @@ async def make_tree(tree, data):
 
 async def comment_update(conn, comment_id, content):
     query = comments.update().where(comments.c.id == comment_id).values(
-        content=content, updated=datetime.utcnow()
+        content=content
     )
     result = await conn.execute(query)
     return result.rowcount
@@ -157,13 +145,13 @@ async def comment_delete(conn, comment_id):
 
 
 async def comment_search(conn, content):
-    query = comments.select(comments.c.content.match(content))
     result = []
+    query = sa.select([comments]).where(comments.c.content.match(
+        sa.cast(func.plainto_tsquery(content), sa.TEXT)
+    ))
     async for row in conn.execute(query):
         result.append({
             'id': row[0],
             'content': row[1],
-            'created': row[2].strftime('%c'),
-            'updated': row[3].strftime('%c'),
         })
     return result
