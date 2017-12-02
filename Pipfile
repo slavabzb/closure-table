@@ -1,0 +1,19 @@
+[[source]]
+
+verify_ssl = true
+name = "pypi"
+url = "https://pypi.python.org/simple"
+
+
+[packages]
+
+sqlalchemy = "*"
+aiohttp = "*"
+aiohttp-swagger = "*"
+aiopg = "*"
+PyJWT = "*"
+sqlalchemy-migrate = "*"
+
+
+[dev-packages]
+
