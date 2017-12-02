@@ -40,6 +40,21 @@ async def comment_create(conn, content, parent_id=None):
                 comments_tree.c.descendant_id,
                 comments_tree.c.depth,
             ], query)
+            # INSERT INTO comments_tree
+            #   (ancestor_id, nearest_ancestor_id, descendant_id, depth)
+            # SELECT
+            #   descendant.ancestor_id,
+            #   nearest.nearest_ancestor_id,
+            #   ancestor.descendant_id,
+            #   nearest.depth + 1
+            # FROM
+            #   comments_tree AS descendant,
+            #   comments_tree AS nearest,
+            #   comments_tree AS ancestor
+            # WHERE descendant.descendant_id = PARENT_ID
+            #   AND ancestor.ancestor_id = COMMENT_ID
+            #   AND nearest.ancestor_id = PARENT_ID
+            #   AND nearest.descendant_id = PARENT_ID
             await conn.execute(query)
     except:
         await conn.execute('ROLLBACK')
@@ -75,6 +90,14 @@ async def comment_get_tree(conn, comment_id):
     ]).select_from(comments.join(
         comments_tree, comments.c.id == comments_tree.c.descendant_id,
     )).where(comments_tree.c.ancestor_id == comment_id)
+    # SELECT
+    #   comments_tree.nearest_ancestor_id,
+    #   comments_comments.id,
+    #   comments_comments.content
+    # FROM
+    #   comments_comments
+    # JOIN comments_tree ON comments_comments.id = comments_tree.descendant_id
+    # WHERE comments_tree.ancestor_id = COMMENT_ID
     tree = {}
     async for row in await conn.execute(query):
         await make_tree(tree, {
@@ -121,6 +144,16 @@ async def comment_delete(conn, comment_id):
             ),
             descendant.c.ancestor_id == comment_id
         ))
+        # SELECT
+        #   remove.descendant_id,
+        #   remove.id
+        # FROM
+        #   comments_tree AS remove,
+        #   comments_tree AS descendant
+        # WHERE (remove.ancestor_id = descendant.descendant_id
+        #       OR remove.nearest_ancestor_id = descendant.descendant_id
+        #       OR remove.descendant_id = descendant.descendant_id)
+        #   AND descendant.ancestor_id = COMMENT_ID
         comment_ids = set()
         comment_tree_ids = set()
         async for row in conn.execute(query):
@@ -149,6 +182,15 @@ async def comment_search(conn, content):
     query = sa.select([comments]).where(comments.c.content.match(
         sa.cast(func.plainto_tsquery(content), sa.TEXT)
     ))
+    # SELECT
+    #   comments_comments.id,
+    #   comments_comments.content
+    # FROM
+    #   comments_comments
+    # WHERE
+    #   comments_comments.content @@ to_tsquery(
+    #       CAST(plainto_tsquery('query text') AS TEXT)
+    #   )
     async for row in conn.execute(query):
         result.append({
             'id': row[0],
