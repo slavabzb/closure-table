@@ -1,4 +1,4 @@
-DATABASE = 'postgresql://dvhb:dvhba@localhost/dvhb'
+DATABASE = 'postgresql://closureuser:closurepass@localhost/closuredb'
 
 JWT_SECRET = 'secret'
 JWT_ALGORITHM = 'HS256'
