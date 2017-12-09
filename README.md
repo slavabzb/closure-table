@@ -1,21 +1,56 @@
-# Асинхронный бэкенд Asyncio + PostgreSQL
+# Closure table using Asyncio + PostgreSQL
 
-Бэкенд предоставляет возможность работы с
-древовидной структурой документов, которая
-хранится в базе данных. Каждый документ имеет
-поле **text**, по которому осуществляется
-полнотекстовый поиск.
+Backend provides a simple API for managing tree-based comments.
 
-Взаимодействие происходит через API. Методы API
-доступны только авторизованным пользователям.
+## Deploy (Ubuntu 16.04 LTS)
 
-В качестве GUI для методов используется Swagger UI.
+1. **Clone repo**
 
-## Развертывание
+    ```bash
+    sudo apt update
+    sudo apt install git
+    git clone https://github.com/vyacheslav-bezborodov/closure-table
+    cd closure-table/
+    ```
 
-* PostgreSQL (доступ к базе указан в настройках);
-* `pip install -r requirements.txt`
-* `python runserver --debug`
-* В браузере перейти на http://localhost:8080/api/doc
-(адрес по умолчанию, конфигурируется в настройках) 
-* Залогиниться. Логин/пароль суперпользователя - admin/admin.
+2. **Set up Python**
+
+    ```bash
+    sudo apt update
+    sudo apt install python-pip
+    sudo -H pip install pipenv
+    pipenv install
+    pipenv shell
+    ```
+
+3. **Set up PostgreSQL**
+
+    ```bash
+    sudo apt update
+    sudo apt install postgresql
+    
+    # create user and db
+    sudo su postgres
+    createuser —pwprompt closureuser    # and type closurepass
+    createdb —owner=closureuser closuredb
+    exit
+    
+    # apply migrations
+    python apps/auth/db/manage.py version_control
+    python apps/auth/db/manage.py upgrade
+    python apps/comments/db/manage.py version_control
+    python apps/comments/db/manage.py upgrade
+    ```
+
+## Run server
+
+Activate the shell and run the script.
+
+```bash
+pipenv shell
+python runserver.py
+```
+
+Then open <http://localhost:8080/api/doc> in your favourite browser.
+
+Use **admin/admin** as a superuser email and password to sign in. 
