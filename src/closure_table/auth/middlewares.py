@@ -1,7 +1,15 @@
 import jwt
-from aiohttp import web
-from settings import JWT_SECRET, JWT_ALGORITHM
-from .db.queries import user_get
+from aiohttp.web import json_response
+from closure_table.auth.db.queries import user_get
+from closure_table.settings import (
+    JWT_SECRET,
+    JWT_ALGORITHM,
+)
+
+
+def setup_middlewares(app):
+    app.middlewares.append(auth_middleware)
+
 
 async def auth_middleware(app, handler):
     async def middleware(request):
@@ -13,11 +21,11 @@ async def auth_middleware(app, handler):
                     jwt_token, JWT_SECRET, algorithms=[JWT_ALGORITHM]
                 )
             except jwt.DecodeError:
-                return web.json_response(status=400, data={
+                return json_response(status=400, data={
                     'error': 'Auth token is invalid'
                 })
             except jwt.ExpiredSignatureError:
-                return web.json_response(status=400, data={
+                return json_response(status=400, data={
                     'error': 'Auth token is expired'
                 })
 
@@ -25,4 +33,5 @@ async def auth_middleware(app, handler):
                 request.user = await user_get(conn, payload['email'])
 
         return await handler(request)
+
     return middleware

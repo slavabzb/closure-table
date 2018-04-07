@@ -1,13 +1,13 @@
 from functools import wraps
 
-from aiohttp import web
+from aiohttp.web import json_response
 
 
 def login_required(view):
     @wraps(view)
     def wrapper(request):
         if not request.user:
-            return web.json_response(status=403, data={
+            return json_response(status=403, data={
                 'error': 'Authorization required'
             })
         return view(request)

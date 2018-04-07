@@ -14,7 +14,7 @@ setup(
     long_description=open(os.path.join(os.path.dirname(__file__), 'README.md')).read(),
     entry_points={
         'console_scripts': [
-            'closure_table=closure_table.cli:cli',
+            'closure-table=closure_table.cli:cli',
         ],
     },
     packages=find_packages('src'),

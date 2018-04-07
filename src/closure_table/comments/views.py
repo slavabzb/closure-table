@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from apps.auth.decorators import login_required
+from closure_table.auth.decorators import login_required
 from .db.queries import comment_create, comment_update, comment_get_tree, \
     comment_delete, comment_get, comment_search
 

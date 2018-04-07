@@ -1,9 +1,9 @@
 import click
-from aiohttp import web
-
-
-async def index(request):
-    return web.Response(text='index')
+from aiohttp.web import (
+    Application,
+    run_app,
+)
+from closure_table.setup import setup_app
 
 
 @click.group()
@@ -13,6 +13,6 @@ def cli():
 
 @cli.command()
 def serve():
-    app = web.Application()
-    app.router.add_get('/', index)
-    web.run_app(app)
+    app = Application()
+    setup_app(app)
+    run_app(app)
