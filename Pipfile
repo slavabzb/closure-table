@@ -11,11 +11,15 @@ sqlalchemy = "*"
 aiohttp = "*"
 aiohttp-swagger = "*"
 aiopg = "*"
-PyJWT = "*"
+pyjwt = "*"
 sqlalchemy-migrate = "*"
+click = "*"
 
 
 [dev-packages]
 
+
+
 [requires]
+
 python_version = "3"
