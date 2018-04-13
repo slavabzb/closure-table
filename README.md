@@ -17,9 +17,9 @@ Backend provides a simple API for managing tree-based comments.
 
     ```bash
     sudo apt update
-    sudo apt install python-pip
-    sudo -H pip install pipenv
-    pipenv install
+    sudo apt install python3-pip
+    sudo -H pip3 install pipenv
+    pipenv install --dev
     pipenv shell
     ```
 
