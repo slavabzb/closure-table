@@ -36,10 +36,10 @@ Backend provides a simple API for managing tree-based comments.
     exit
     
     # apply migrations
-    python apps/auth/db/manage.py version_control
-    python apps/auth/db/manage.py upgrade
-    python apps/comments/db/manage.py version_control
-    python apps/comments/db/manage.py upgrade
+    python src/closure_table/auth/db/manage.py version_control
+    python src/closure_table/auth/db/manage.py upgrade
+    python src/closure_table/comments/db/manage.py version_control
+    python src/closure_table/comments/db/manage.py upgrade
     ```
 
 ## Run server

@@ -2,4 +2,4 @@
 from migrate.versioning.shell import main
 
 if __name__ == '__main__':
-    main(repository='apps/auth/db/', debug='False', url='postgresql://closureuser:closurepass@localhost/closuredb')
+    main(repository='src/closure_table/auth/db/', debug='False', url='postgresql://closureuser:closurepass@localhost/closuredb')
