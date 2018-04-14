@@ -1,8 +1,14 @@
 from aiohttp import web
-
 from closure_table.auth.decorators import login_required
-from .db.queries import comment_create, comment_update, comment_get_tree, \
-    comment_delete, comment_get, comment_search
+
+from .db.queries import (
+    comment_create,
+    comment_update,
+    comment_get_tree,
+    comment_delete,
+    comment_get,
+    comment_search,
+)
 
 
 @login_required
@@ -29,13 +35,18 @@ async def comment_update_view(request):
 
 
 @login_required
+async def comment_delete_view(request):
+    async with request.app['db'].acquire() as conn:
+        count = await comment_delete(conn, request.match_info['id'])
+        return web.json_response({'deleted': count})
+
+
 async def comment_get_view(request):
     async with request.app['db'].acquire() as conn:
         comment_list = await comment_get(conn)
         return web.json_response({'comments': comment_list})
 
 
-@login_required
 async def comment_get_tree_view(request):
     async with request.app['db'].acquire() as conn:
         tree = await comment_get_tree(conn, request.match_info['id'])
@@ -44,14 +55,6 @@ async def comment_get_tree_view(request):
         return web.json_response(status=404)
 
 
-@login_required
-async def comment_delete_view(request):
-    async with request.app['db'].acquire() as conn:
-        count = await comment_delete(conn, request.match_info['id'])
-        return web.json_response({'deleted': count})
-
-
-@login_required
 async def comment_search_view(request):
     async with request.app['db'].acquire() as conn:
         comment_list = await comment_search(conn, request.match_info['text'])

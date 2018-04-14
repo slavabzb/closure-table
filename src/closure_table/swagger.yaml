@@ -124,9 +124,6 @@ paths:
             $ref: "#/definitions/error"
 
   /comments:
-    parameters:
-      - $ref: "#/parameters/authToken"
-
     get:
       summary: Returns a list of the root comments
       operationId: getRootComments
@@ -149,6 +146,7 @@ paths:
       tags:
         - comments
       parameters:
+        - $ref: "#/parameters/authToken"
         - name: comment
           in: body
           description: The comment to create
@@ -176,7 +174,6 @@ paths:
   /comments/{id}:
     parameters:
       - $ref: "#/parameters/commentId"
-      - $ref: "#/parameters/authToken"
 
     get:
       summary: Returns the comment tree
@@ -197,6 +194,7 @@ paths:
       tags:
         - comments
       parameters:
+        - $ref: "#/parameters/authToken"
         - name: content
           in: body
           description: The updated comment
@@ -228,6 +226,8 @@ paths:
       operationId: deleteComment
       tags:
         - comments
+      parameters:
+        - $ref: "#/parameters/authToken"
       responses:
         default:
           description: Returns the number of the deleted comments
@@ -242,7 +242,6 @@ paths:
   /comments/search/{text}:
     parameters:
       - $ref: "#/parameters/commentContent"
-      - $ref: "#/parameters/authToken"
 
     get:
       summary: A full-text comment search

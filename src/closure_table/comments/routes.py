@@ -1,6 +1,11 @@
-from .views import comment_get_tree_view, comment_create_view, \
-    comment_delete_view, comment_update_view, comment_get_view, \
-    comment_search_view
+from .views import (
+    comment_get_tree_view,
+    comment_create_view,
+    comment_delete_view,
+    comment_update_view,
+    comment_get_view,
+    comment_search_view,
+)
 
 ENDPOINT = '/comments'
 
