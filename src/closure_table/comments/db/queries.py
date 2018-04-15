@@ -76,7 +76,7 @@ async def comment_get(conn):
     comment_list = []
     async for row in await conn.execute(query):
         tree = {}
-        await make_tree(tree, {
+        make_tree(tree, {
             'id': row[0],
             'content': row[1],
         })
@@ -102,7 +102,7 @@ async def comment_get_tree(conn, comment_id):
     # WHERE comments_tree.ancestor_id = COMMENT_ID
     tree = {}
     async for row in await conn.execute(query):
-        await make_tree(tree, {
+        make_tree(tree, {
             'parent_id': row[0],
             'id': row[1],
             'content': row[2],
@@ -111,15 +111,15 @@ async def comment_get_tree(conn, comment_id):
     return tree
 
 
-async def make_tree(tree, data):
+def make_tree(tree, data):
     if 'id' in tree:
         if tree['id'] == data['parent_id']:
             subtree = {}
-            await make_tree(subtree, data)
+            make_tree(subtree, data)
             tree['children'].append(subtree)
         else:
             for child in tree['children']:
-                await make_tree(child, data)
+                make_tree(child, data)
     else:
         for k, v in data.items():
             tree[k] = v
