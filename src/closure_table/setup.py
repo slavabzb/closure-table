@@ -12,7 +12,7 @@ BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 def setup_app(app):
-    # setup_db(app)
+    setup_db(app)
     setup_routes(app)
     setup_middlewares(app)
     setup_swagger(app, swagger_from_file=os.path.join(BASE_PATH, 'swagger.yaml'))
