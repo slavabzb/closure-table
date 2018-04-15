@@ -1,7 +1,9 @@
 import sqlalchemy as sa
+from closure_table.comments.db.tables import (
+    comments,
+    comments_tree,
+)
 from sqlalchemy.sql.expression import func
-
-from .tables import comments, comments_tree
 
 
 async def comment_create(conn, content, parent_id=None):

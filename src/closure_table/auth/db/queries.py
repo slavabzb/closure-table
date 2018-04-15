@@ -1,4 +1,4 @@
-from .tables import users
+from closure_table.auth.db.tables import users
 
 
 async def user_get(conn, email):
