@@ -1,4 +1,4 @@
-from .views import (
+from closure_table.comments.views import (
     comment_get_tree_view,
     comment_create_view,
     comment_delete_view,
