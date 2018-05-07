@@ -1,8 +1,5 @@
 import click
-from aiohttp.web import (
-    Application,
-    run_app,
-)
+from aiohttp.web import Application, run_app
 from closure_table.setup import setup_app
 
 

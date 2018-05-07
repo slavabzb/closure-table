@@ -1,17 +1,10 @@
 import hashlib
-from datetime import (
-    datetime,
-    timedelta,
-)
+from datetime import datetime, timedelta
 
 import jwt
 from aiohttp import web
 from closure_table.auth.db.queries import user_get
-from closure_table.settings import (
-    JWT_ALGORITHM,
-    JWT_EXP_DELTA_SECONDS,
-    JWT_SECRET,
-)
+from closure_table.settings import JWT_ALGORITHM, JWT_EXP_DELTA_SECONDS, JWT_SECRET
 
 
 async def user_login_view(request):

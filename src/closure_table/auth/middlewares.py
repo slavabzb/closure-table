@@ -1,10 +1,7 @@
 import jwt
 from aiohttp.web import json_response
 from closure_table.auth.db.queries import user_get
-from closure_table.settings import (
-    JWT_SECRET,
-    JWT_ALGORITHM,
-)
+from closure_table.settings import JWT_ALGORITHM, JWT_SECRET
 
 
 def setup_middlewares(app):

@@ -1,7 +1,7 @@
 from aiohttp import web
 from closure_table.auth.decorators import login_required
 
-from .db.queries import (
+from closure_table.comments.db.queries import (
     comment_create,
     comment_update,
     comment_get_tree,
